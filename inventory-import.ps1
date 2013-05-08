@@ -27,9 +27,12 @@ foreach($item in $itemList) {
 
 	$name = $item.name
 	$type = $item.type
-	$path = $item.path
+	$path = $item.path		# this is the path to the parent inventory object
 	$childType = $item.childType
 	$currentObj = $null
+
+	# if we have the  datacenters folder object we do not need a parent. We just get the object.
+	# For all other inventory objects we find the parent and great the node off of it.
 	if ($name -ne "Datacenters") {
 		$parent = $indxMgr.FindByInventoryPath($path)
 		if ($parent -ne $null) {
@@ -37,6 +40,7 @@ foreach($item in $itemList) {
 		}
 		else{
 			Write-Host "Parent not found... on to next inventory object"
+			continue;
 		}
 		
 		$selfpath = $path + "/" + $item.Name
@@ -50,6 +54,9 @@ foreach($item in $itemList) {
 			$currentObj = $self
 		}
 		else {
+			# We must have already created the parent object first so we know which parent node to create an 
+			# object on.
+
 			$pObj = Get-View -Property Name $parent
 			
 			if ($type -eq "Datacenter") {
@@ -60,16 +67,12 @@ foreach($item in $itemList) {
 			}
 			elseif ($type -eq "HostSystem" -or $type -eq "ComputeResource"){
 				Write-Host "name: " $name " parent : " $parent.Value
-		}
+			}
 			elseif ($type -eq "ClusterComputeResource"){
 				$spec = ImportClusterConfig $item $parent $name
-				Write-Host "Cluster parent.Value: "  $parent.Value " name: " $name 
 				$currentObj = $pObj.CreateClusterEx($name, $spec )	
 			}	
 			elseif ($type -eq "ResourcePool"){
-				Write-Host "name: " $name " parent : " $parent.Value
-#				$pObj = Get-View -Property Name "ResourcePool-resgroup-222"
-				Write-Host "name: " $name " pObj : " $pObj
 				$rpSpec = ImportRPConfig $item
 				$currentObj = $pObj.CreateResourcePool($name, $rpSpec)
 			}
@@ -79,26 +82,31 @@ foreach($item in $itemList) {
 		}
 	}
 	else {
+		# if we have the Datacenters folder object we do not need to find its parent because it is the root of the tree. We just get the object.
 		$currentObj = $rootFolder.MoRef
 	}
 	
-	
-#	$permissionList = @()
-#	foreach ($permission in $item.SelectNodes(".//permissions/permission")) {
-#		$role = $permission.role
-#		$principal = $permission.principal
-#		$propagate = $permission.propagate
-#		$group = $permission.group
-#		
-#		$perm = New-Object VMware.Vim.Permission
-#		if($group -eq "True") {$perm.Group=$True} else {$perm.Group=$False}
-#		$perm.Principal = $principal
-#		if($propagate -eq "True") {$perm.Propagate=$True} else {$perm.Propagate=$False}
-#		$perm.RoleId = $roleHash[$role]
-#		
-#		$permissionList += $perm;
-#	}
-#	$authMgr.SetEntityPermissions($currentObj,$permissionList)
+	# Get the permissions for this managed object. This is a list of actions 
+	# that can be performed by a user or group eg create a new VM
+
+	$permissionList = @()
+	foreach ($permission in $item.SelectNodes(".//permissions/permission")) {
+		$role = $permission.role
+		$principal = $permission.principal
+		$propagate = $permission.propagate
+		$group = $permission.group
+		
+		$perm = New-Object VMware.Vim.Permission
+		if($group -eq "True") {$perm.Group=$True} else {$perm.Group=$False}
+		$perm.Principal = $principal
+		if($propagate -eq "True") {$perm.Propagate=$True} else {$perm.Propagate=$False}
+		$perm.RoleId = $roleHash[$role]
+		
+		$permissionList += $perm;
+	}
+	#Update the authorization manager.
+
+	$authMgr.SetEntityPermissions($currentObj,$permissionList)
 }
 
 function ImportRPConfig($item)
@@ -194,23 +202,23 @@ function ImportClusterConfig($item, $parent, $name)
 	
 	}
 	
-#	foreach ($dasVmObj in $item.SelectNodes(".//ClusterSettings/dasVmConfig")) 
-#	{
-#		$i=0		
-#		
-#		$spec.dasVMConfigSpec += new-object VMware.Vim.ClusterDasVmConfigSpec
-#  		$spec.dasVMConfigSpec[$i].info = new-object Vmware.Vim.ClusterDasVmConfigInfo
-#		$spec.dasVMConfigSpec[$i].info.dasSettings = new-object VMware.Vim.ClusterDasVmSettings
-#		$spec.dasVMConfigSpec[$i].info.key = nul
-#		
-#		$dsaSettings = $dasVmObj.selectSingleNode("info").selectSingleNode("dasSettings").get_InnerXML()
-#		$key =  $dasVmObj.selectSingleNode("info").selectSingleNode("key").get_InnerXML()
-#  		$spec.dasVMConfigSpec[$i].info.dasSettings.isolationResponse = $dsaSettings.isolationResponse
-#  		$spec.dasVMConfigSpec[$i].info.dasSettings.restartPriority = $dsaSettings.restartPriority
-#		$spec.dasVMConfigSpec[$i].info.key.value = $key.Value
-#		$i++
-#	}
-#	
+	foreach ($dasVmObj in $item.SelectNodes(".//ClusterSettings/dasVmConfig")) 
+	{
+		$i=0		
+		
+		$spec.dasVMConfigSpec += new-object VMware.Vim.ClusterDasVmConfigSpec
+ 		$spec.dasVMConfigSpec[$i].info = new-object Vmware.Vim.ClusterDasVmConfigInfo
+		$spec.dasVMConfigSpec[$i].info.dasSettings = new-object VMware.Vim.ClusterDasVmSettings
+		$spec.dasVMConfigSpec[$i].info.key = nul
+		
+		$dsaSettings = $dasVmObj.selectSingleNode("info").selectSingleNode("dasSettings").get_InnerXML()
+		$key =  $dasVmObj.selectSingleNode("info").selectSingleNode("key").get_InnerXML()
+ 		$spec.dasVMConfigSpec[$i].info.dasSettings.isolationResponse = $dsaSettings.isolationResponse
+  		$spec.dasVMConfigSpec[$i].info.dasSettings.restartPriority = $dsaSettings.restartPriority
+		$spec.dasVMConfigSpec[$i].info.key.value = $key.Value
+		$i++
+	}
+	
 
 
 	### DPM CONFIG   ###
@@ -230,7 +238,7 @@ function ImportClusterConfig($item, $parent, $name)
 	
 	}
 
-#	foreach ($dpmHostConfig in $item.SelectNodes(".//ClusterSettings/dpmHostConfig")) {
+	foreach ($dpmHostConfig in $item.SelectNodes(".//ClusterSettings/dpmHostConfig")) {
 #		Write-Host "DPM HOST"
 #		$i = 0
 #		$hostObjs = $dpmHostConfig.SelectNodes(".//host")

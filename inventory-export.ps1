@@ -37,7 +37,7 @@ function GetInventoryItem($MoRef, $dirPath){
 				$currentPath += "/" + $obj.Name
 			}
 
-			# REcurse through each child entity of the folder. Could be a VM, host, Cluster, Datacenter...
+			# Recurse through each child entity of the folder. Could be a VM, host, Cluster, Datacenter...
 			$obj.childEntity | foreach{GetInventoryItem $_ $currentPath};
 		}
 		"Datacenter" {
