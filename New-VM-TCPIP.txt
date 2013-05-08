@@ -1,0 +1,15 @@
+﻿# prerequisite: Ensure the CustomizationSpec, referenced below (win7) has been created in VirtualCenter (under management)
+
+
+$dataCenter = Get-Datacenter -Name "NY"
+$vmHost = Get-VMHost -Name "192.168.1.222"
+$vmName = "Merck"
+$cluster = Get-Cluster -Name "AMD-201"
+$template = Get-Template -Name "win7_ult_64"
+$dataStore = Get-Datastore -Name "Storage1"
+$specName = "win7"
+
+Get-OSCustomizationSpec -Name $specName" | Get-OSCustomizationNicMapping | Set-OSCustomizationNicMapping  -IpMode UseStaticIP -IpAddress 192.168.1.229 -SubnetMask 255.255.248.0 -Dns 192.168.1.1 -DefaultGateway 192.168.1.1
+
+New-VM -Name "MyNewVM-4” -VMHost $vmHost -Datastore $dataStore -template $template -OSCustomizationSpec (Get-OSCustomizationSpec -Name "win7")
+

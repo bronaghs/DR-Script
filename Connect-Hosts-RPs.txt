@@ -1,0 +1,336 @@
+param($vCenter, $inputFile)
+$invRoot="/"
+$rp =$null
+
+
+
+
+# this script connects the hosts and resource pools before we import the entire vSphere inventory.
+# This is because a password is needed to be input by the user.
+
+function ImportRPConfig($item)
+{
+	
+	foreach ($rpConfig in $item.SelectNodes(".//RPSettings/config")) 
+	{
+		$memExpandableReservationTmp = $rpConfig.selectSingleNode("memoryAllocation").selectSingleNode("expandableReservation").get_InnerXML()
+		$memExpandableReservation = [System.Convert]::ToBoolean($memExpandableReservationTmp)
+		$memOverheadLimit = $rpConfig.selectSingleNode("memoryAllocation").selectSingleNode("overheadLimit").get_InnerXML()
+		$memLimit = $rpConfig.selectSingleNode("memoryAllocation").selectSingleNode("limit").get_InnerXML() 
+		$memReservation = $rpConfig.selectSingleNode("memoryAllocation").selectSingleNode("reservation").get_InnerXML()
+		$memShareslevel = $rpConfig.selectSingleNode("memoryAllocation").selectSingleNode("shares").selectSingleNode("level").get_InnerXML()
+		$memShares =0
+		if ($memShareslevel -eq "custom")
+		{
+			$memShares = $rpConfig.selectSingleNode("memoryAllocation").selectSingleNode("shares").selectSingleNode("shares").get_InnerXML()
+		}
+													
+		$cpuExpandableReservationTmp = $rpConfig.selectSingleNode("cpuAllocation").selectSingleNode("expandableReservation").get_InnerXML()
+		$cpuExpandableReservation = [System.Convert]::ToBoolean($cpuExpandableReservationTmp)
+		$cpuOverheadLimit = $rpConfig.selectSingleNode("cpuAllocation").selectSingleNode("overheadLimit").get_InnerXML()	
+		$cpuLimit = $rpConfig.selectSingleNode("cpuAllocation").selectSingleNode("limit").get_InnerXML() 
+		$cpuReservation = $rpConfig.selectSingleNode("cpuAllocation").selectSingleNode("reservation").get_InnerXML()
+		$cpuShareslevel = $rpConfig.selectSingleNode("cpuAllocation").selectSingleNode("shares").selectSingleNode("level").get_InnerXML()
+		$cpuShares =0
+		if ($cpuShareslevel -eq "custom")
+		{
+			$cpuShares = $rpConfig.selectSingleNode("cpuAllocation").selectSingleNode("shares").selectSingleNode("shares").get_InnerXML()	
+		}
+				
+#		Unless a customized level of CPU and Memory shares was explicitly set for this resourcepool we do pass any share
+#		value into the New-ResourcePool function. This means we need to test for all scenarios
+
+		if ($cpuShares -eq 0){
+			if ($memShares -eq 0)
+			{
+				$rp = New-ResourcePool -Location $pObj.Name -Name $name -CpuExpandableReservation $cpuExpandableReservation -CpuReservationMhz $cpuReservation -CpuSharesLevel $cpuShareslevel -MemExpandableReservation $memExpandableReservation -MemLimitMB $memLimit  -MemReservationMB $memReservation -MemSharesLevel $memShareslevel 
+			}
+			else{
+				$rp = New-ResourcePool -Location $pObj.Name -Name $name -CpuExpandableReservation $cpuExpandableReservation -CpuReservationMhz $cpuReservation -CpuSharesLevel $cpuShareslevel  -MemExpandableReservation $memExpandableReservation -MemLimitMB $memLimit  -MemReservationMB $memReservation -MemSharesLevel $memShareslevel -NumMemShares $memShares
+			}
+		}
+		else
+		{
+			if ($memShares -eq 0)
+			{
+				$rp = New-ResourcePool -Location $pObj.Name -Name $name -CpuExpandableReservation $cpuExpandableReservation -CpuReservationMhz $cpuReservation -CpuSharesLevel  $cpuShareslevel -NumCpuShares $cpuShares -MemExpandableReservation $memExpandableReservation -MemLimitMB $memLimit  -MemReservationMB $memReservation -MemSharesLevel $memShareslevel 
+			}
+			else{
+				$rp = New-ResourcePool -Location $pObj.Name -Name $name -CpuExpandableReservation $cpuExpandableReservation -CpuReservationMhz $cpuReservation -CpuSharesLevel  $cpuShareslevel -NumCpuShares $cpuShares -MemExpandableReservation $memExpandableReservation -MemLimitMB $memLimit  -MemReservationMB $memReservation -MemSharesLevel $memShareslevel -NumMemShares $memShares
+			}
+		}
+	}
+	
+	# The code below gathers the VMs that belong to this RP and makes them part of the RP.
+	$pool = Get-View -Id $rp.Id
+
+	$list = New-Object VMware.Vim.ManagedObjectReference[] ($item.SelectNodes(".//VM").Count)
+	$i =0
+	foreach ($vm in $item.SelectNodes(".//VM")) 
+	{
+		$vmName = $vm.selectSingleNode("Name").get_InnerXML()
+		$vmView = Get-View -ViewType VirtualMachine -Filter @{"Name" = $vmName.ToString().Trim() }
+		$list[$i] = $vmView.MoRef
+		$i ++
+	}
+	$pool.MoveIntoResourcePool($list)
+	
+	return $pool.MoRef
+}
+
+function ImportAlarmDefinitions($currentObj)
+{
+	foreach ($alarmDef in $item.SelectNodes(".//AlarmDefinition")) {
+	
+		$alarmSpec = New-Object VMware.Vim.AlarmSpec
+		$alarmSpec.name = $alarmDef.name
+		$alarmSpec.description = $alarmDef.Description
+		$alarmSpec.enabled = $alarmDef.Enabled
+		$alarmSpec.actionFrequency  = ($alarmDef.ActionRepeatMinutes / 60)
+		$alarmSpec.expression = New-Object $alarmDef.ExpressionOperator
+		$alarmSpec.expression.expression = New-Object VMware.Vim.AlarmExpression[] ($alarmDef.SelectNodes(".//Expression").Count)
+		$ctr = 0
+		
+		foreach ($expression in $alarmDef.SelectNodes(".//Expression")) 
+		{
+			switch ($expression.expressionType)
+			{
+				VMware.Vim.MetricAlarmExpression
+				{
+
+					$alarmSpec.expression.expression[$ctr] = New-Object VMware.Vim.MetricAlarmExpression
+					$alarmSpec.expression.expression[$ctr].operator = $expression.operator
+					$alarmSpec.expression.expression[$ctr].type = $expression.type
+					$alarmSpec.expression.expression[$ctr].metric = New-Object VMware.Vim.PerfMetricId
+					$alarmSpec.expression.expression[$ctr].metric.counterId = $expression.CounterId
+					$alarmSpec.expression.expression[$ctr].metric.instance = $expression.instance
+					$alarmSpec.expression.expression[$ctr].yellow = $expression.yellow
+					$alarmSpec.expression.expression[$ctr].yellowInterval = $expression.yellowInterval
+					$alarmSpec.expression.expression[$ctr].red = $expression.red
+					$alarmSpec.expression.expression[$ctr].redInterval = $expression.redInterval
+				}
+				VMware.Vim.EventAlarmExpression
+				{
+					$compCtr=0
+				
+					$alarmSpec.expression.expression[$ctr] = New-Object VMware.Vim.EventAlarmExpression
+					$alarmSpec.expression.expression[$ctr].EventType = $expression.eventType
+					$alarmSpec.expression.expression[$ctr].status = $expression.status
+					$alarmSpec.expression.expression[$ctr].objectType = $expression.objectType				
+					$alarmSpec.expression.expression[$ctr].comparisons =  New-Object VMware.Vim.EventAlarmExpressionComparison[] $expression.SelectNodes(".//Comparison").Count
+						
+					foreach ($comp in $expression.SelectNodes(".//Comparison")) {
+					
+						$alarmSpec.expression.expression[$ctr].comparisons[$compCtr] = New-Object  VMware.Vim.EventAlarmExpressionComparison
+						$alarmSpec.expression.expression[$ctr].comparisons[$compCtr].attributeName = $comp.attributeName
+						$alarmSpec.expression.expression[$ctr].comparisons[$compCtr].operator = $comp.operator
+						$alarmSpec.expression.expression[$ctr].comparisons[$compCtr].value = $comp.value
+						$compCtr++
+					}
+				}
+				VMware.Vim.StateAlarmExpression
+				{
+
+					$alarmSpec.expression.expression[$ctr] = New-Object VMware.Vim.StateAlarmExpression
+					$alarmSpec.expression.expression[$ctr].operator = $expression.operator
+					$alarmSpec.expression.expression[$ctr].type = $expression.type
+					$alarmSpec.expression.expression[$ctr].statePath = $expression.statePath
+					$alarmSpec.expression.expression[$ctr].yellow = $expression.yellow
+					$alarmSpec.expression.expression[$ctr].red = $expression.red
+				}
+				default{}
+			}
+			$ctr++
+		}
+		
+		
+		$actCtr =0
+		$alarmSpec.action = New-Object VMware.Vim.GroupAlarmAction
+		$alarmSpec.action.action = New-Object VMware.Vim.AlarmAction[] ($alarmDef.SelectNodes(".//Action").Count)
+		$alarmSpec.action.action[$actCtr] = New-Object VMware.Vim.AlarmTriggeringAction
+
+		foreach ($action in $alarmDef.SelectNodes(".//Action")) {
+
+		switch($action.actionType)
+		{
+					VMware.Vim.RunScriptAction
+					{
+						$alarmSpec.action.action[$actCtr].action = New-Object VMware.Vim.RunScriptAction
+						$alarmSpec.action.action[$actCtr].action.Script = $action.scriptFilePath
+					}
+					VMware.Vim.SendEmailAction
+					{
+						$alarmSpec.action.action[$actCtr].action = New-Object VMware.Vim.SendEmailAction
+						$alarmSpec.action.action[$actCtr].action.toList = $action.to
+						$alarmSpec.action.action[$actCtr].action.ccList = $action.cc
+						$alarmSpec.action.action[$actCtr].action.subject = $action.subject
+						$alarmSpec.action.action[$actCtr].action.body = $action.body
+					}
+					VMware.Vim.SendSNMPAction 
+					{
+						$alarmSpec.action.action[$actCtr].action = New-Object VMware.Vim.SendSNMPAction
+					}
+					VMware.Vim.MethodAction 
+					{
+						$alarmSpec.action.action[$actCtr].action = New-Object VMware.Vim.MethodAction
+						$alarmSpec.action.action[$actCtr].action.Name = $action.name
+					}
+				}
+				$tCtr=0
+				
+		
+				foreach ($tSpec in $action.SelectNodes(".//TransitionSpec")) 
+				{
+					$alarmSpec.action.action[$actCtr].transitionSpecs = New-Object VMware.Vim.AlarmTriggeringActionTransitionSpec[] ($action.SelectNodes(".//TransitionSpec").Count)
+					$alarmSpec.action.action[$actCtr].transitionSpecs[$tCtr] = New-Object VMware.Vim.AlarmTriggeringActionTransitionSpec
+					$alarmSpec.action.action[$actCtr].transitionSpecs[$tCtr].startState = $tSpec.startState
+					$alarmSpec.action.action[$actCtr].transitionSpecs[$tCtr].finalState = $tSpec.finalState
+					$alarmSpec.action.action[$actCtr].transitionSpecs[$tCtr].repeats =   [System.Convert]::ToBoolean($tSpec.repeats)
+					$tCtr++
+				}
+				$alarmSpec.action.action[$actCtr].green2yellow = $action.green2yellow
+				$alarmSpec.action.action[$actCtr].yellow2red = $action.yellow2red
+				$alarmSpec.action.action[$actCtr].red2yellow = $action.red2yellow
+				$alarmSpec.action.action[$actCtr].yellow2green = $action.yellow2green
+				
+				$actCtr++
+			}
+			
+			$alarmSpec.setting = New-Object VMware.Vim.AlarmSetting
+			$alarmSpec.setting.toleranceRange = $alarmDef.ToleranceRange
+			$alarmSpec.setting.reportingFrequency = $alarmDef.reportingFrequency
+
+			$_this = Get-View -Id 'AlarmManager-AlarmManager'
+			$_this.CreateAlarm($currentObj, $alarmSpec)
+	}
+}
+	
+	
+Connect-VIServer -Server $vCenter -Protocol https 
+
+
+$serviceInstance = get-view ServiceInstance
+$authMgr = get-view AuthorizationManager
+$indxMgr = Get-View SearchIndex
+
+$roleHash = @{};
+$authMgr.RoleList | foreach {$roleHash[$_.name]=$_.roleId}
+
+$rootFolder = get-view -property Name $serviceInstance.Content.rootFolder
+
+$xmlDoc = New-Object System.Xml.XmlDocument
+$currentPath = Resolve-Path .
+$xmlDoc.Load($currentPath.Path + "\" + $inputFile)
+$itemList = $xmlDoc.SelectNodes("//root/itemList/item")
+
+#----------Launch input form to capture the standard ESX Server password for all ESX servers-----
+$passwordInput = Read-Host "Please enter the ESX Server password " -AsSecureString 
+
+#convert secure password to normal string to log into the ESX server
+$Ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToCoTaskMemUnicode($passwordInput)
+$Password = [System.Runtime.InteropServices.Marshal]::PtrToStringUni($Ptr)
+[System.Runtime.InteropServices.Marshal]::ZeroFreeCoTaskMemUnicode($Ptr)
+
+
+
+foreach($item in $itemList) {
+	$name = $item.name
+	$type = $item.type
+	$path = $item.path		# ---path represents the path from the root of the VC tree to the current node terminating at the parent
+	$childType = $item.childType
+	$currentObj = $null
+	
+	Write-Host  $type  $name $path -ForegroundColor Blue
+	
+	if ($name -ne "Datacenters") {
+	
+		$parent = $indxMgr.FindByInventoryPath($path)
+		if ($parent -eq $null) {
+			Write-Host "Could not find parent "  $path ", cannot create node" $name
+			continue
+		}
+			
+			
+		#----- Check if this node already exists in the inventory, if so we do not create it ----
+		$selfpath = $path + "/" + $item.Name
+		$self = $null
+		$self = $indxMgr.FindByInventoryPath($selfpath)
+		trap {
+			if ($_.Exception.Message.contains("nvalid argument"))
+			{
+				Write-Host "Possible vSphere version mismatch when processing " $item.type " "  $item.name " " $_.InvocationInfo.PositionMessage -ForegroundColor Red; 
+			}
+			else
+			{
+				Write-Host "Error: " $_ $_.InvocationInfo.PositionMessage -ForegroundColor Red;
+			}
+			continue;
+		}
+		if ($self -eq $null) {
+			#----- Get the entire parent object (not just the MO)
+			$pObj = Get-View -Property Name $parent
+			
+			if ($type -eq "HostSystem" -or $type -eq "ComputeResource"){
+
+				Add-VMHost -Name $item.Name -Location $pObj.Name  -Password $Password -User root -Force	
+
+				$currentObj = New-Object VMware.Vim.ManagedObjectReference
+				$currentObj.Type = "HostSystem"
+				$currentObj.Value = $name
+			}
+			elseif ($type -eq "ResourcePool")
+			{
+	   			$currentObj = ImportRPConfig $item
+			}
+			elseif ($type -eq "Datastore")
+			{
+				if ($pObj)
+				{
+					# when we add a host to VC the datastores are automatically added at the same time.
+					# However, they are are, by default, added to the datacenter level. So we the code below moves
+					# them to the right location as per the XML file.
+					
+					$ds = Get-Datastore -Name $name 
+					$dsView = Get-View -Id $ds.Id			
+					$pObj.MoveIntoFolder($dsView.MoRef)
+				}
+			}
+		}	
+	}
+	$permissionList = @()
+	if ($currentObj)
+	{
+#		take each inventory object as it is created and set its permissions
+
+		foreach ($permission in $item.SelectNodes(".//permissions/permission")) {
+			$role = $permission.role
+			$principal = $permission.principal
+			$propagate = $permission.propagate
+			$group = $permission.group
+			
+			$perm = New-Object VMware.Vim.Permission
+			if($group -eq "True") {$perm.Group=$True} else {$perm.Group=$False}
+			$perm.Principal = $principal
+			if($propagate -eq "True") {$perm.Propagate=$True} else {$perm.Propagate=$False}
+			$perm.RoleId = $roleHash[$role]
+			
+			$permissionList += $perm;
+		}
+		try
+		{
+			if ($permissionList)
+			{
+				$authMgr.SetEntityPermissions($currentObj,$permissionList)
+			}
+		}
+		catch
+		{
+			Write-Host "Error setting permissions on " $currentObj.value -ForegroundColor Red
+		}
+		
+		ImportAlarmDefinitions $currentObj
+	}
+	
+}
+
+Disconnect-VIServer -Server $vCenter -Confirm 

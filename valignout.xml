@@ -1,0 +1,560 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <itemList>
+    <item>
+      <name>Datacenters</name>
+      <type>Folder</type>
+      <path>
+      </path>
+      <childtype>Datacenter</childtype>
+      <permissions>
+        <permission>
+          <role>Admin</role>
+          <principal>Administrators</principal>
+          <propagate>True</propagate>
+          <group>True</group>
+        </permission>
+      </permissions>
+      <AlarmDefinition>
+        <Description>Monitors the fullness of the IPMI System Event Log.  See the host's Hardware Status Tab for more details.</Description>
+        <Enabled>True</Enabled>
+        <ActionRepeatMinutes />
+        <ToleranceRange />
+        <reportingFrequency />
+        <Name>Host IPMI System Event Log status</Name>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>SEL</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>green</value>
+        <eventType>EventEx</eventType>
+        <status>green</status>
+        <objectType>HostSystem</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>SEL</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>green</value>
+        <eventType>EventEx</eventType>
+        <status>green</status>
+        <objectType>HostSystem</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>SEL</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>yellow</value>
+        <eventType>EventEx</eventType>
+        <status>yellow</status>
+        <objectType>HostSystem</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>SEL</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>yellow</value>
+        <eventType>EventEx</eventType>
+        <status>yellow</status>
+        <objectType>HostSystem</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>SEL</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>red</value>
+        <eventType>EventEx</eventType>
+        <status>red</status>
+        <objectType>HostSystem</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>SEL</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>red</value>
+        <eventType>EventEx</eventType>
+        <status>red</status>
+        <objectType>HostSystem</objectType>
+        <actionType>VMware.Vim.SendSNMPAction</actionType>
+        <startStatus />
+        <endStatus />
+        <repeat />
+        <green2yellow>True</green2yellow>
+        <red2yellow>True</red2yellow>
+        <yellow2green>True</yellow2green>
+        <yellow2red>True</yellow2red>
+      </AlarmDefinition>
+      <AlarmDefinition>
+        <Description>Monitors the status of the Baseboard Management Controller. See the host's Hardware Status Tab for more details.</Description>
+        <Enabled>True</Enabled>
+        <ActionRepeatMinutes />
+        <ToleranceRange />
+        <reportingFrequency />
+        <Name>Host Baseboard Management Controller status</Name>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>BMC</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>green</value>
+        <eventType>EventEx</eventType>
+        <status>green</status>
+        <objectType>HostSystem</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>BMC</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>green</value>
+        <eventType>EventEx</eventType>
+        <status>green</status>
+        <objectType>HostSystem</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>BMC</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>yellow</value>
+        <eventType>EventEx</eventType>
+        <status>yellow</status>
+        <objectType>HostSystem</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>BMC</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>yellow</value>
+        <eventType>EventEx</eventType>
+        <status>yellow</status>
+        <objectType>HostSystem</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>BMC</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>red</value>
+        <eventType>EventEx</eventType>
+        <status>red</status>
+        <objectType>HostSystem</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>group</attributeName>
+        <operator>equals</operator>
+        <value>BMC</value>
+        <attributeName>newState</attributeName>
+        <operator>equals</operator>
+        <value>red</value>
+        <eventType>EventEx</eventType>
+        <status>red</status>
+        <objectType>HostSystem</objectType>
+        <actionType>VMware.Vim.SendSNMPAction</actionType>
+        <startStatus />
+        <endStatus />
+        <repeat />
+        <green2yellow>True</green2yellow>
+        <red2yellow>True</red2yellow>
+        <yellow2green>True</yellow2green>
+        <yellow2red>True</yellow2red>
+      </AlarmDefinition>
+    </item>
+    <item>
+      <name>NY</name>
+      <type>Datacenter</type>
+      <path>/</path>
+      <childtype />
+      <permissions />
+      <AlarmDefinition>
+        <Description>dsfsfd</Description>
+        <Enabled>True</Enabled>
+        <ActionRepeatMinutes>300</ActionRepeatMinutes>
+        <ToleranceRange />
+        <reportingFrequency />
+        <Name>DC SNMP Alarm</Name>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>host.name</attributeName>
+        <operator>equals</operator>
+        <value>192.168.1.222</value>
+        <eventType>HostDasEnablingEvent</eventType>
+        <status>red</status>
+        <objectType>HostSystem</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>host.name</attributeName>
+        <operator>equals</operator>
+        <value>192.168.1.222</value>
+        <eventType>HostDasEnablingEvent</eventType>
+        <status>red</status>
+        <objectType>HostSystem</objectType>
+        <actionType>VMware.Vim.SendSNMPAction</actionType>
+        <startStatus />
+        <endStatus />
+        <repeat />
+        <green2yellow />
+        <red2yellow />
+        <yellow2green />
+        <yellow2red />
+      </AlarmDefinition>
+    </item>
+    <item>
+      <name>Discovered virtual machine</name>
+      <type>Folder</type>
+      <path>/NY/vm</path>
+      <childtype>VirtualMachine</childtype>
+      <permissions />
+    </item>
+    <item>
+      <name>AMD-201</name>
+      <type>ClusterComputeResource</type>
+      <path>/NY/host</path>
+      <EVCMode>
+      </EVCMode>
+      <ClusterSettings>
+        <dasConfig>
+          <admissionControlEnabled>True</admissionControlEnabled>
+          <failoverLevel>1</failoverLevel>
+          <defaultVmSettings>
+            <isolationResponse>none</isolationResponse>
+            <restartPriority>high</restartPriority>
+            <vmToolsMonitoringSettings>
+              <clusterSettings>True</clusterSettings>
+              <enabled>True</enabled>
+              <failureInterval>30</failureInterval>
+              <maxFailureWindow>3600</maxFailureWindow>
+              <maxFailures>3</maxFailures>
+              <minUpTime>120</minUpTime>
+              <vmMonitoring>vmMonitoringOnly</vmMonitoring>
+            </vmToolsMonitoringSettings>
+          </defaultVmSettings>
+          <hostMonitoring>enabled</hostMonitoring>
+          <enabled>True</enabled>
+          <Options>
+            <option>
+              <key>das.allowNetwork0</key>
+              <value>Service Console</value>
+            </option>
+            <option>
+              <key>das.allowNetwork1</key>
+              <value>Management Network</value>
+            </option>
+          </Options>
+          <vmMonitoring>vmMonitoringOnly</vmMonitoring>
+        </dasConfig>
+        <dpmConfig>
+          <defaultDpmBehavior>automated</defaultDpmBehavior>
+          <enabled>False</enabled>
+          <hostPowerActionRate>3</hostPowerActionRate>
+          <Options>
+            <option>
+              <key>
+              </key>
+              <value>
+              </value>
+            </option>
+          </Options>
+        </dpmConfig>
+        <dpmHostConfig>
+          <host>
+            <behavior>manual</behavior>
+            <enabled>True</enabled>
+            <key>HostSystem-host-532</key>
+          </host>
+        </dpmHostConfig>
+        <dasVmConfig>
+        </dasVmConfig>
+        <drsConfig>
+          <defaultVmBehavior>fullyAutomated</defaultVmBehavior>
+          <enableVmBehaviorOverrides>True</enableVmBehaviorOverrides>
+          <enabled>True</enabled>
+          <Options>
+            <option>
+              <key>das.allowNetwork1</key>
+              <value>service1</value>
+            </option>
+          </Options>
+          <vmotionRate>3</vmotionRate>
+        </drsConfig>
+        <drsVmConfig>
+        </drsVmConfig>
+        <rules>
+          <rule>
+            <enabled>True</enabled>
+            <inCompliance>
+            </inCompliance>
+            <key>1</key>
+            <mandatory>
+            </mandatory>
+            <name>Rules for 000s</name>
+            <status>gray</status>
+            <userCreated>True</userCreated>
+            <vm>vm-550</vm>
+            <vm>vm-555</vm>
+            <vm>vm-553</vm>
+            <vm>vm-557</vm>
+          </rule>
+          <rule>
+            <enabled>True</enabled>
+            <inCompliance>
+            </inCompliance>
+            <key>2</key>
+            <mandatory>
+            </mandatory>
+            <name>Demo Rules</name>
+            <status>gray</status>
+            <userCreated>True</userCreated>
+            <vm>vm-116</vm>
+            <vm>vm-544</vm>
+          </rule>
+        </rules>
+        <groups>
+          <vmGroup>
+            <name>The 0000s</name>
+            <vms>VirtualMachine-vm-550 VirtualMachine-vm-553 VirtualMachine-vm-559 VirtualMachine-vm-561 VirtualMachine-vm-557 VirtualMachine-vm-555</vms>
+          </vmGroup>
+          <vmGroup>
+            <name>Demo Group</name>
+            <vms>VirtualMachine-vm-116 VirtualMachine-vm-544</vms>
+          </vmGroup>
+          <hostGroup>
+            <name>HostGroup</name>
+            <host>HostSystem-host-532</host>
+          </hostGroup>
+        </groups>
+        <vmSwapPlacement>vmDirectory</vmSwapPlacement>
+      </ClusterSettings>
+      <childtype />
+      <permissions />
+      <AlarmDefinition>
+        <Description>this is a test</Description>
+        <Enabled>True</Enabled>
+        <ActionRepeatMinutes>-1</ActionRepeatMinutes>
+        <ToleranceRange />
+        <reportingFrequency />
+        <Name>Test Alarm</Name>
+        <expressionType>VMware.Vim.MetricAlarmExpression</expressionType>
+        <CounterId>2</CounterId>
+        <instance />
+        <operator>isAbove</operator>
+        <red>9000</red>
+        <redInterval>300</redInterval>
+        <yellow>7500</yellow>
+        <yellowInterval>300</yellowInterval>
+        <type>VirtualMachine</type>
+        <actionType>VMware.Vim.SendEmailAction</actionType>
+        <body />
+        <cc />
+        <to>bronaghmcl@yahoo.com;</to>
+        <subject />
+        <startStatus />
+        <endStatus />
+        <repeat />
+        <green2yellow />
+        <red2yellow />
+        <yellow2green />
+        <yellow2red />
+      </AlarmDefinition>
+    </item>
+    <item>
+      <name>192.168.1.222</name>
+      <type>HostSystem</type>
+      <path>/NY/host/AMD-201</path>
+      <childtype />
+      <permissions />
+    </item>
+    <item>
+      <name>Test ResourcePool</name>
+      <type>ResourcePool</type>
+      <path>/NY/host/AMD-201</path>
+      <RPSettings>
+        <config>
+          <changeVersion>
+          </changeVersion>
+          <lastModified>
+          </lastModified>
+          <entity>ResourcePool-resgroup-667</entity>
+          <cpuAllocation>
+            <expandableReservation>True</expandableReservation>
+            <limit>-1</limit>
+            <overheadLimit>
+            </overheadLimit>
+            <reservation>0</reservation>
+            <shares>
+              <level>custom</level>
+              <shares>7992</shares>
+            </shares>
+          </cpuAllocation>
+          <memoryAllocation>
+            <expandableReservation>True</expandableReservation>
+            <limit>-1</limit>
+            <overheadLimit>
+            </overheadLimit>
+            <reservation>0</reservation>
+            <shares>
+              <level>custom</level>
+              <shares>127677</shares>
+            </shares>
+          </memoryAllocation>
+        </config>
+      </RPSettings>
+      <childtype />
+      <permissions />
+      <AlarmDefinition>
+        <Description>Test ResourcePool alarm</Description>
+        <Enabled>True</Enabled>
+        <ActionRepeatMinutes>-1</ActionRepeatMinutes>
+        <ToleranceRange />
+        <reportingFrequency />
+        <Name>RP Alarm</Name>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>changeTag</attributeName>
+        <operator>equals</operator>
+        <value>222</value>
+        <eventType>VmFailedMigrateEvent</eventType>
+        <status>red</status>
+        <objectType>VirtualMachine</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>changeTag</attributeName>
+        <operator>equals</operator>
+        <value>222</value>
+        <eventType>VmFailedMigrateEvent</eventType>
+        <status>red</status>
+        <objectType>VirtualMachine</objectType>
+        <actionType>VMware.Vim.MethodAction</actionType>
+        <startStatus />
+        <endStatus />
+        <repeat />
+        <green2yellow />
+        <red2yellow />
+        <yellow2green />
+        <yellow2red />
+      </AlarmDefinition>
+      <AlarmDefinition>
+        <Description>testing script</Description>
+        <Enabled>True</Enabled>
+        <ActionRepeatMinutes>60</ActionRepeatMinutes>
+        <ToleranceRange />
+        <reportingFrequency />
+        <Name>RP Script</Name>
+        <expressionType>VMware.Vim.MetricAlarmExpression</expressionType>
+        <CounterId>2</CounterId>
+        <instance />
+        <operator>isAbove</operator>
+        <red>9000</red>
+        <redInterval>300</redInterval>
+        <yellow>7500</yellow>
+        <yellowInterval>300</yellowInterval>
+        <type>VirtualMachine</type>
+        <actionType>VMware.Vim.RunScriptAction</actionType>
+        <scriptFilePath />
+        <startStatus />
+        <endStatus />
+        <repeat />
+        <green2yellow />
+        <red2yellow />
+        <yellow2green />
+        <yellow2red />
+      </AlarmDefinition>
+      <AlarmDefinition>
+        <Description>test for event alarm</Description>
+        <Enabled>True</Enabled>
+        <ActionRepeatMinutes>540</ActionRepeatMinutes>
+        <ToleranceRange />
+        <reportingFrequency />
+        <Name>Event Alarm Test</Name>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>datacenter</attributeName>
+        <operator>equals</operator>
+        <value>1111</value>
+        <eventType>VmDiskFailedEvent</eventType>
+        <status>red</status>
+        <objectType>VirtualMachine</objectType>
+        <expressionType>VMware.Vim.EventAlarmExpression</expressionType>
+        <attributeName>datacenter</attributeName>
+        <operator>equals</operator>
+        <value>1111</value>
+        <eventType>VmDiskFailedEvent</eventType>
+        <status>red</status>
+        <objectType>VirtualMachine</objectType>
+        <actionType>VMware.Vim.SendEmailAction</actionType>
+        <body />
+        <cc />
+        <to>foo@foo.com;</to>
+        <subject />
+        <startStatus />
+        <endStatus />
+        <repeat />
+        <green2yellow />
+        <red2yellow />
+        <yellow2green />
+        <yellow2red />
+      </AlarmDefinition>
+    </item>
+    <item>
+      <name>RP1</name>
+      <type>ResourcePool</type>
+      <path>/NY/host/AMD-201/Test ResourcePool</path>
+      <RPSettings>
+        <config>
+          <changeVersion>
+          </changeVersion>
+          <lastModified>
+          </lastModified>
+          <entity>ResourcePool-resgroup-668</entity>
+          <cpuAllocation>
+            <expandableReservation>True</expandableReservation>
+            <limit>-1</limit>
+            <overheadLimit>
+            </overheadLimit>
+            <reservation>0</reservation>
+            <shares>
+              <level>normal</level>
+              <shares>4000</shares>
+            </shares>
+          </cpuAllocation>
+          <memoryAllocation>
+            <expandableReservation>True</expandableReservation>
+            <limit>-1</limit>
+            <overheadLimit>
+            </overheadLimit>
+            <reservation>0</reservation>
+            <shares>
+              <level>normal</level>
+              <shares>163840</shares>
+            </shares>
+          </memoryAllocation>
+        </config>
+      </RPSettings>
+      <childtype />
+      <permissions />
+    </item>
+    <item>
+      <name>192.168.1.4</name>
+      <type>ComputeResource</type>
+      <path>/NY/host</path>
+      <childtype />
+      <permissions />
+    </item>
+    <item>
+      <name>192.168.1.3</name>
+      <type>ComputeResource</type>
+      <path>/NY/host</path>
+      <childtype />
+      <permissions />
+    </item>
+  </itemList>
+  <Settings>
+    <licenseServer>27000@blah.merck.com</licenseServer>
+    <maxDbConnection>5</maxDbConnection>
+    <mailServer>mysmtpblah</mailServer>
+    <mailSender>bronaghmc7897l</mailSender>
+  </Settings>
+</root>
