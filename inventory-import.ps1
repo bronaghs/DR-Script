@@ -9,7 +9,6 @@
 #---------------------------------------------------------------------------------------------------
 
 
-
 param($inputFile="inventory.xml")
 param($invRoot="/")
 $authMgr = get-view AuthorizationManager
